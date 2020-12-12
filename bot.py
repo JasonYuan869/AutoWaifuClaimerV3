@@ -94,7 +94,10 @@ async def on_ready():
         # Convert __h __ to minutes
         times = []
         for x in [match.group(3), match.group(4), match.group(5), match.group(7)]:
-            if 'h ' in x:
+            # Specifically, group 7 may be None if kakera is ready
+            if x is None:
+                x = 0
+            elif 'h ' in x:
                 x = x.split('h ')
                 x = int(x[0]) * 60 + int(x[1])
             elif x == 'ready' or x == 'now':
