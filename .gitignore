@@ -1,0 +1,12 @@
+/venv/
+/.idea/
+/dist/
+/build/
+/__pycache__/
+/bot.spec
+/build.bat
+/build.sh
+/notes.txt
+/log.txt
+/geckodriver.log
+/data/likelist.txt
