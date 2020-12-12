@@ -62,11 +62,15 @@ class Timer:
             time.sleep(x)
             self.roll_timer += datetime.timedelta(minutes=self.roll_duration)
             self.logger.info('Rolls have been reset')
-            if self.claim_available:
+            if config.ALWAYS_ROLL:
                 self.logger.info(f'Initiating {self.roll_count} rolls')
                 self.browser.roll(self.roll_count)
             else:
-                self.logger.info(f'No claim available, not rolling')
+                if self.claim_available:
+                    self.logger.info(f'Initiating {self.roll_count} rolls')
+                    self.browser.roll(self.roll_count)
+                else:
+                    self.logger.info(f'No claim available, not rolling')
 
     def wait_for_claim(self):
         while True:
