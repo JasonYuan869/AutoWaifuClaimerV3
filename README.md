@@ -1,5 +1,5 @@
 # AutoWaifuClaimer
-Auto claims from Discord Mudae bot. Adapted from my previous (now obsolete) AutoWaifuClaimer project, which used a Discord bot to listen for roll events and reacted using the pyinput module and the official Discord client. The previous implementation came with the major limitation of requiring Discord to be the main focused window, preventing the user from doing any other tasks at the same time. This new implementation solves that problem and is overall significantly more reliable and consistent due to a novel waifu-parsing algorithm.
+Auto claims from Discord Mudae bot. Adapted from my previous (now obsolete) AutoWaifuClaimer project, which used a Discord bot to listen for roll events and reacted using the pyinput module and the official Discord client. The previous implementation came with the major limitation of requiring Discord to be the main focused window, preventing the user from doing any other tasks at the same time. This new implementation solves that problem and is overall significantly more reliable and consistent.
 
 ## Features
 - Automatically rolling at set intervals and (optionally) only if a claim is available
