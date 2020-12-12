@@ -29,6 +29,8 @@ class Browser:
         react_emoji(emoji, message_id)
             Searches and clicks an emoji button.
             Raises Exception if button was not found.
+        roll(count)
+            Sends the roll command for count number of times with 3 seconds between each roll.
         close()
             Closes the browser window.
         """
