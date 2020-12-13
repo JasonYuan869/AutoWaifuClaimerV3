@@ -24,9 +24,11 @@ LOGIN_INFO = ("example@example.com", "password")
 CLAIM_DURATION = 180
 
 # Time between roll resets, in minutes.
+# Set to 0 to disable auto rolls.
 ROLL_DURATION = 60
 
 # Time between daily command resets, in minutes.
+# Set to 0 to disable auto dailies.
 DAILY_DURATION = 1200
 
 # Time between kakera loot resets, in minutes. Set to 0 to always attempt kakera loot.
