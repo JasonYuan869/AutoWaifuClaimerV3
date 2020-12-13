@@ -140,10 +140,18 @@ async def on_ready():
             logging.info('Creating new Timer based on parsed information')
             timer = Timer(browser, timing_info["claim_reset"], timing_info["rolls_reset"], timing_info["daily_reset"],
                           timing_info['claim_available'], timing_info["kakera_reset"], timing_info["kakera_available"])
+
+            if config.DAILY_DURATION > 0:
+                threading.Thread(name='daily', target=timer.wait_for_daily).start()
+            if config.ROLL_DURATION > 0:
+                threading.Thread(name='roll', target=timer.wait_for_roll).start()
             threading.Thread(name='claim', target=timer.wait_for_claim).start()
-            threading.Thread(name='daily', target=timer.wait_for_daily).start()
-            threading.Thread(name='roll', target=timer.wait_for_roll).start()
             threading.Thread(name='kakera', target=timer.wait_for_kakera).start()
+
+            # For some reason, browser Discord crashes sometime at this point
+            # Refresh the page to fix
+            browser.refresh()  # Blocking call
+            logging.info("Listener is ready")
             ready = True
 
 
@@ -200,6 +208,7 @@ async def on_message(message):
         # Return if reaction message or author incorrect
         if payload.message_id != message.id: return
         if payload.user_id != mudae.id: return
+
         # Open thread to click emoji
         emoji = payload.emoji
         pool.submit(browser.react_emoji, emoji.name, message.id)
@@ -209,12 +218,9 @@ async def on_message(message):
     global main_user, mudae, dm_channel, roll_channel, ready
     if not ready: return
 
-    if message.content == 'test':
-        await client.wait_for('raw_reaction_add', check=reaction_check, timeout=10)
-
     # Only parse messages from the bot in the right channel that contain a valid embed
     if message.channel != roll_channel or message.author != mudae or not len(message.embeds) == 1 or \
-        message.embeds[0].image.url == message.embeds[0].Empty: return
+            message.embeds[0].image.url == message.embeds[0].Empty: return
 
     embed = message.embeds[0]
     if not (waifu_result := parse_embed()): return  # Return if parsing failed

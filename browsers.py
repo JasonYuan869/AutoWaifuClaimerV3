@@ -31,6 +31,8 @@ class Browser:
             Raises Exception if button was not found.
         roll(count)
             Sends the roll command for count number of times with 3 seconds between each roll.
+        refresh()
+            Refreshes the page.
         close()
             Closes the browser window.
         """
@@ -39,7 +41,6 @@ class Browser:
         options.add_argument('-headless')
         self.driver = webdriver.Firefox(executable_path=config.WEB_DRIVER_PATH, options=options)
         self.actions = ActionChains(self.driver)
-        self.message_box = None  # To be initialized with the message box's WebElement
 
         # Logging initialization
         self.logger = logging.getLogger(__name__)
@@ -63,8 +64,7 @@ class Browser:
             self.driver.find_element(By.XPATH, "//button[@type='submit']").click()
             try:
                 # Wait for main screen
-                self.message_box = WebDriverWait(self.driver, 30).until(
-                    lambda x: x.find_element(By.CLASS_NAME, 'slateTextArea-1Mkdgw'))
+                WebDriverWait(self.driver, 30).until(lambda x: x.find_element(By.CLASS_NAME, 'slateTextArea-1Mkdgw'))
                 if f'{config.SERVER_ID}/{config.CHANNEL_ID}' not in self.driver.current_url:
                     # Logged in, but wrong channel (some weird error)
                     raise ValueError
@@ -83,7 +83,14 @@ class Browser:
         # ActionChains must be used to instead to type character by character
         self.actions = ActionChains(self.driver)
         self.logger.info(f'Sending text: {text}')
-        self.actions.click(on_element=self.message_box)
+        try:
+            message_box = WebDriverWait(self.driver, 1).until(
+                lambda x: x.find_element(By.CLASS_NAME, 'slateTextArea-1Mkdgw'))
+        except TimeoutException:
+            self.logger.warning("Discord may have crashed, refreshing page")
+            self.refresh()
+            return self.send_text(text)
+        self.actions.click(on_element=message_box)
         for char in text:
             self.actions.key_down(char)
             self.actions.key_up(char)
@@ -96,7 +103,7 @@ class Browser:
         xpath = f"//div[@id='chat-messages-{message_id}']//div[@aria-label='{emoji}, press to react']"
         try:
             # Get div containing emoji
-            emoji_div = WebDriverWait(self.driver, 3).until(lambda x: x.find_element(By.XPATH, xpath))
+            emoji_div = WebDriverWait(self.driver, 7).until(lambda x: x.find_element(By.XPATH, xpath))
             # Get current count
             count = int(emoji_div.find_element(By.XPATH, "//div[@class='reactionCount-2mvXRV']").text)
             # Click emoji
@@ -125,6 +132,11 @@ class Browser:
         for _ in range(count):
             self.send_text(f'{config.COMMAND_PREFIX}{config.ROLL_COMMAND}')
             time.sleep(3)  # Sleep for 3 seconds between roll commands
+
+    def refresh(self):
+        self.driver.refresh()
+        WebDriverWait(self.driver, 10).until(
+            lambda x: x.find_element(By.CLASS_NAME, 'slateTextArea-1Mkdgw'))
 
     def close(self):
         self.driver.close()
