@@ -68,7 +68,7 @@ class Browser:
                 if f'{config.SERVER_ID}/{config.CHANNEL_ID}' not in self.driver.current_url:
                     # Logged in, but wrong channel (some weird error)
                     raise ValueError
-            except TimeoutException:
+            except TimeoutException or NoSuchElementException:
                 self.logger.critical('Login was unsuccessful. Please check LOGIN_INFO entry in config.py')
                 raise TimeoutError
             except ValueError:
