@@ -50,3 +50,5 @@ Released under GNU GPL 3. See `LICENSE` for details.
 
 ## Disclaimer
 This project was mostly designed as a proof of concept. I am not responsible for banned user accounts or salty friends. Use at your own risk.
+
+This project also collects your Discord email and password in **plaintext**. Although it does not use this information for any purpose other than to login to Discord on the web, please keep this information safe so that it is not accidentally accessed by other users of the computer. Also, feel free to manually audit the source code to see where exactly the information is being used (the only instance is in `browsers.Browser.browser_login()`).
