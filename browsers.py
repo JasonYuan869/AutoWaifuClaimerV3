@@ -80,7 +80,7 @@ class Browser:
 
     def send_text(self, text: str):
         # For some reason, typing directly into the message box doesn't work
-        # ActionChains must be used to instead to type character by character
+        # ActionChains must be used instead to type character by character
         self.actions = ActionChains(self.driver)
         self.logger.info(f'Sending text: {text}')
         try:
