@@ -52,4 +52,9 @@ LOG_FILE = "./log.txt"
 # $ sudo apt update
 # $ sudo apt install geckodriver
 # On Windows, download from https://github.com/mozilla/geckodriver/releases and extract the Windows version
+# Make sure to use double backslashes "\\" in Windows when typing paths
+# Ex. "C:\\Program Files\\Mozilla Firefox\\geckodriver.exe"
+# On Linux, single forward slashes are okay.
+# Ex. "/usr/bin/geckodriver"
+# Set to None if geckodriver is in the PATH
 WEB_DRIVER_PATH = "/usr/bin/geckodriver"
