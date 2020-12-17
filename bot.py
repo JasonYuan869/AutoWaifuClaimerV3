@@ -132,7 +132,7 @@ async def on_ready():
         try:
             await client.wait_for('message', check=parse_tu, timeout=3)
         except TimeoutError:
-            logging.critical('Could not parse $tu command, quitting')
+            logging.critical('Could not parse $tu command, quitting (try again)')
             browser.close()
             await close_bot()
         else:
