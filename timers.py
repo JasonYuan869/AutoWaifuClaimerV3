@@ -57,8 +57,8 @@ class Timer:
 
     def wait_for_roll(self):
         while True:
-            x = (self.roll_timer - datetime.datetime.now()).seconds
-            self.logger.info(f'Roll timer sleeping for {x} seconds')
+            x = (self.roll_timer - datetime.datetime.now()).total_seconds()
+            self.logger.info(f'Roll timer sleeping for {x:.0f} seconds')
             time.sleep(x)
             self.roll_timer += datetime.timedelta(minutes=self.roll_duration)
             self.logger.info('Rolls have been reset')
@@ -74,8 +74,8 @@ class Timer:
 
     def wait_for_claim(self):
         while True:
-            x = (self.claim_timer - datetime.datetime.now()).seconds
-            self.logger.info(f'Claim timer sleeping for {x} seconds')
+            x = (self.claim_timer - datetime.datetime.now()).total_seconds()
+            self.logger.info(f'Claim timer sleeping for {x:.0f} seconds')
             time.sleep(x)
             self.claim_timer += datetime.timedelta(minutes=self.claim_duration)
             self.logger.info(f'Claims have been reset')
@@ -83,23 +83,24 @@ class Timer:
 
     def wait_for_daily(self):
         while True:
-            x = (self.daily_timer - datetime.datetime.now()).seconds
+            x = (self.daily_timer - datetime.datetime.now()).total_seconds()
             if x > 0:  # In case daily is already ready
-                self.logger.info(f'Daily timer sleeping for {x} seconds')
+                self.logger.info(f'Daily timer sleeping for {x:.0f} seconds')
                 time.sleep(x)
                 self.logger.info(f'Daily has been reset, initiating daily commands')
             else:
                 self.logger.info('Daily is ready, initiating daily commands')
             self.daily_timer += datetime.timedelta(minutes=self.daily_duration)
             self.browser.send_text(f'{config.COMMAND_PREFIX}daily')
-            time.sleep(3)  # Wait 2 seconds for processing
+            time.sleep(3)  # Wait 3 seconds for processing
             self.browser.send_text(f'{config.COMMAND_PREFIX}dk')
 
     def wait_for_kakera(self):
         while True:
-            x = (self.kakera_timer - datetime.datetime.now()).seconds
-            self.logger.info(f'Kakera loot timer sleeping for {x} seconds')
-            time.sleep(x)
+            x = (self.kakera_timer - datetime.datetime.now()).total_seconds()
+            if x > 0:  # In case kakera is already ready
+                self.logger.info(f'Kakera loot timer sleeping for {x:.0f} seconds')
+                time.sleep(x)
             self.kakera_timer += datetime.timedelta(minutes=self.kakera_duration)
-            self.logger.info(f'Kakera loot have been reset')
+            self.logger.info(f'Kakera loot has been reset')
             self.kakera_available = True
