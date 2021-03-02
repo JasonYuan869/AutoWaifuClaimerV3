@@ -125,6 +125,10 @@ class Browser:
             self.logger.critical('Unable to find the emoji to click')
             raise TimeoutError
 
+    def add_heart(self):
+        # Just type it.
+        self.send_text(f'+:heart:')
+
     def roll(self, count: int):
         """
         Rolls for count number of times.

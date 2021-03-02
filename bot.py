@@ -234,6 +234,11 @@ async def on_message(message):
             return
 
         logging.info(f'Character {waifu_result["name"]} in likelist, attempting marry')
+
+        # New Mudae bot does not automatically add emojis, just react.
+        pool.submit(browser.react_emoji, "❤", message.id)
+
+        """
         try:
             await client.wait_for('raw_reaction_add', check=reaction_check, timeout=3)
         except TimeoutError:
@@ -242,6 +247,7 @@ async def on_message(message):
         else:
             await dm_channel.send(content=f"Marry attempted for {waifu_result['name']}", embed=embed)
             timer.set_claim_availability(False)
+        """
 
     # If key was rolled
     if waifu_result['owner'] == main_user.name and waifu_result['key']:
