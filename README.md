@@ -46,7 +46,7 @@ Windows/Linux binaries have not been created and I don't think I will unless the
 Regex strings for parsing the Mudae embed was adapted from Znunu's EzMudae module available at https://github.com/Znunu/EzMudae.
 
 ## License
-Released under GNU GPL 3. See `LICENSE` for details.
+Released under MIT. See `LICENSE` for details.
 
 ## Disclaimer
 This project was mostly designed as a proof of concept. I am not responsible for banned user accounts or salty friends. Use at your own risk.
