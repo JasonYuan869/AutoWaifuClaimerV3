@@ -15,7 +15,8 @@ Auto claims from Discord Mudae bot. Adapted from my previous (now obsolete) Auto
 - Cross platform support
 
 ## Limitations and bugs
-- You tell me :)
+- ~~You tell me :)~~
+- **currently unmaintained**
 
 ## Requirements
 - Firefox and [geckodriver](https://github.com/mozilla/geckodriver/releases)
