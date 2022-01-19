@@ -1,0 +1,111 @@
+# Enter names EXACTLY as spelt in waifu-bot one per line
+# Use these hashmarks on new lines for comments
+# The bot ignores empty lines
+Zero Two
+Mai Sakurajima
+Nezuko Kamado
+Mikasa Ackerman
+Hange Zoe
+Rias Gremory
+Saber
+Miku Nakano
+Chika Fujiwara
+Yumeko Jabami
+Emilia
+Shinobu Kochou
+Violet Evergarden
+Hatsune Miku
+Aqua
+Satoru Gojou
+Albedo
+Akame
+Nino Nakano
+Himiko Toga
+Levi
+Kirby
+Rin Tohsaka
+Akeno Himejima
+Power
+Hinata Hyuuga
+Shiro
+Kanna Kamui
+Ai Hayasaka
+Esdeath
+Rikka Takanashi
+Nico Robin
+Tohru
+Gawr Gura
+Nobara Kugisaki
+Raphtalia
+Neferpitou
+Sinon
+Chizuru Ichinose
+Shoto Todoroki
+Asuka Langley Soryu
+Mitsuri Kanroji
+Killua Zoldyck
+Nyan Cat
+Kurisu Makise
+Itsuki Nakano
+Ryuuko Matoi
+Makima
+Katsuki Bakugou
+Annie Leonhart
+Sasha Braus
+Eren Jaeger
+Yotsuba Nakano
+Monkey D. Luffy
+Kanao Tsuyuri
+Momo Yaoyorozu
+Tanjirou Kamado
+Shouko Nishimiya
+Osamu Dazai
+Tsuyu Asui
+Kaori Miyazono
+Giyuu Tomioka
+Boa Hancock
+Touka Kirishima
+Kyouko Hori
+Roronoa Zoro
+Mary Saotome
+Lucy Heartfilia
+Krista Lenz
+Yuuji Itadori
+Izuku Midoriya
+Yukino Yukinoshita
+Jolyne Cujoh
+Lucoa
+Hestia
+Junko Enoshima
+Kyoujurou Rengoku
+Ken Kaneki
+Megumi Fushiguro
+Shinobu Oshino
+Artoria Pendragon (Alter)
+Tatsumaki
+Echidna
+Crona
+Naruto Uzumaki
+Fubuki
+Misa Amane
+Eri
+Tamaki Kotatsu
+Setsuna
+Booette
+Inori Yuzuriha
+Mt. Lady
+Rias Gremory
+Mai Sakurajima
+Ikumi Mito
+Chizuru Ichinose
+Momo Yaoyorozu
+Rukia Kuchiki
+Runa Yomozuki
+Kirari Momobami
+Satoru Gojou
+Echidna
+Beatrice (RZ)
+Satella
+Felt
+Priscilla Barielle
+Petra Leyte

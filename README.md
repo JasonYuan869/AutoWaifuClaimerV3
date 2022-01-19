@@ -1,22 +1,24 @@
-# AutoWaifuClaimer (New)
+# AutoWaifuClaimer (Updated)
 Auto claims from Discord Mudae bot. Adapted from my previous (now obsolete) AutoWaifuClaimer project, which used a Discord bot to listen for roll events and reacted using the pyinput module and the official Discord client. The previous implementation came with the major limitation of requiring Discord to be the main focused window, preventing the user from doing any other tasks at the same time. This new implementation solves that problem and is overall significantly more reliable and consistent.
 
 ## Features
 - Automatically rolling at set intervals and (optionally) only if a claim is available
 - Automatically claiming `$daily` and `$dk`
-- Automatically claiming waifus that are listed in `data/likelist.txt`, only if claim is available
+- Automatically sending `$im`
+- Automatically claiming waifus that are listed in `data/lovelist.txt`, only if claim is available
 - Automatically claiming kakera loot when available
 - DM the main user on:
-  - Attempted claim
-  - Attempted kakera react
+  - Attempts to claim
+  - Attempts to react to kakera
   - Keys rolled
+  - Alerts for liked characters
 - Log all rolled characters
 - Can run in the background 24/7
-- Cross platform support
+- Cross-platform support (?)
 
 ## Limitations and bugs
-- ~~You tell me :)~~
-- **currently unmaintained**
+- Some unexpected behaviour
+- 
 
 ## Requirements
 - Firefox and [geckodriver](https://github.com/mozilla/geckodriver/releases)
@@ -27,19 +29,28 @@ Auto claims from Discord Mudae bot. Adapted from my previous (now obsolete) Auto
 There are essentially three different processes running at the same time in this program. The first one opens browser Discord a headless Firefox window and attempts to login with provided credentials. The second one activates a Discord bot that will be listening for rolls and other activity. The last process controls the timers for rolling, claiming, kakera loots, and daily commands. Upon startup, the browser program will send a `$tu` command, which will be parsed by the bot. This will determine the time to next claim, roll, and daily. User commands are sent through Selenium keyboard actions to simulate a real user typing into the message box. Emoji reactions are interacted by executing Javascript on the site to click a specified reaction. As the program runs, the bot will continuously listen for rolls and parse them with regex (credit to [Znunu/EzMudae](https://github.com/Znunu/EzMudae) for the regex strings). If the roll is unclaimed and matches a name from the likelist, it automatically attempts a claim if one is available. Similarly, if a roll is already claimed, it automatically attempts a kakera loot if one is available. Lastly, if the roll is already claimed by the main user (specified in `config.py`), the bot will DM the user of a new key.
 
 ## Usage
-Clone this repository and fill in the data in `config.py`. See that file for more information. For information about copying Discord IDs, see [here](https://support.discord.com/hc/en-us/articles/206346498-Where-can-I-find-my-User-Server-Message-ID-). For information about making a bot see [here](https://www.writebots.com/discord-bot-token/).
+Clone this repository and fill in the data in `.env`. See that file for more information. For information about copying Discord IDs, see [here](https://support.discord.com/hc/en-us/articles/206346498-Where-can-I-find-my-User-Server-Message-ID-). For information about making a bot see [here](https://www.writebots.com/discord-bot-token/).
+
+You will **need** to add a bot to the server.
 
 The bot must have the following permissions:
 - View Channels
 - Read Message History
 
-Add wishes to `likelist.txt`. See that file for more information.
-
 Install Python 3.8+ and required modules. Optionally make a new virtual environment for it.
 
 `pip install -r requirements.txt`
 
-Install Firefox and geckodriver. This will be used for the browser Discord control. Put the path to the geckodriver executable in `config.py`. To start the bot, run `bot.py`.
+
+Add wishes to `lovelist.txt`. The lovelist is so the program knows who to claim without hesitation. The program will immediately attempt to react if a character is rolled in the lovelist.
+
+Add likes to `likelist.txt`. The lovelist is so the program sends you alerts when a character you like is rolled, giving you control over claiming them or not. (Move fast if its someone else's roll)
+
+Install Firefox: https://www.mozilla.org/en-US/firefox/
+
+Download geckodriver: https://github.com/mozilla/geckodriver/releases (for your platform)
+
+This will be used for the browser Discord control. Put the path to the geckodriver executable in `config.py`. To start the bot, run `main.py`.
 
 Windows/Linux binaries have not been created and I don't think I will unless there is a strong demand for them.
 

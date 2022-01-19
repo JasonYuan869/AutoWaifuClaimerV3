@@ -23,9 +23,9 @@ import threading
 import logging
 import datetime
 import aiohttp
-import config
-from browsers import Browser
-from timers import Timer
+from config import config
+from classes.browsers import Browser
+from classes.timers import Timer
 
 # noinspection PyArgumentList
 logging.basicConfig(
@@ -61,6 +61,14 @@ timing_info = {
 }
 
 
+async def add_emoji(message_id):
+    await client
+
+
+async def go_offline():
+    await client.change_presence(status=discord.Status.offline)
+
+
 async def close_bot():
     await client.close()
     client.loop.stop()
@@ -70,6 +78,7 @@ async def close_bot():
 
 @client.event
 async def on_ready():
+    await go_offline()
     # Ensure the browser is ready before proceeding (blocking call)
     try:
         browser_login.result()
@@ -176,10 +185,12 @@ async def on_message(message):
         # Check if it was a roll
         # Look for any
         match = re.search(r'(?<=\*)(\d+)', desc, re.DOTALL)
-        if match: return
+        if match:
+            return
 
         # Check if valid parse
-        if not series: return
+        if not series:
+            return
 
         # Get owner if present
         if not embed.footer.text:
@@ -193,7 +204,7 @@ async def on_message(message):
                 is_claimed = False
 
         # Log in roll list and console/logfile
-        with open('./data/rolled.txt', 'a') as f:
+        with open('waifu_list/rolled.txt', 'a') as f:
             f.write(f'{datetime.datetime.now()}    {name} - {series}\n')
 
         logging.info(f'Parsed roll: {name} - {series} - Claimed: {is_claimed}')
@@ -206,48 +217,50 @@ async def on_message(message):
 
     def reaction_check(payload):
         # Return if reaction message or author incorrect
-        if payload.message_id != message.id: return
-        if payload.user_id != mudae.id: return
+        if payload.message_id != message.id:
+            return
+        if payload.user_id != mudae.id:
+            return
 
         # Open thread to click emoji
         emoji = payload.emoji
         pool.submit(browser.react_emoji, emoji.name, message.id)
         return True
 
-    ## BEGIN ON_MESSAGE BELOW ##
+    # BEGIN ON_MESSAGE BELOW #
     global main_user, mudae, dm_channel, roll_channel, ready
-    if not ready: return
+    if not ready:
+        return
 
     # Only parse messages from the bot in the right channel that contain a valid embed
     if message.channel != roll_channel or message.author != mudae or not len(message.embeds) == 1 or \
-            message.embeds[0].image.url == message.embeds[0].Empty: return
+            message.embeds[0].image.url == message.embeds[0].Empty:
+        return
 
     embed = message.embeds[0]
-    if not (waifu_result := parse_embed()): return  # Return if parsing failed
+    if not (waifu_result := parse_embed()):
+        return  # Return if parsing failed
+    browser.set_character(waifu_result['name'])
 
     # If unclaimed waifu was on likelist
-    if waifu_result['name'] in like_array and not waifu_result['is_claimed']:
+    if waifu_result['name'] in love_array:
+        logging.warning(f'{waifu_result["name"]} in lovelist')
         if not timer.get_claim_availability():  # No claim is available
-            logging.warning(f'Character {waifu_result["name"]} was on the likelist but no claim was available!')
-            await dm_channel.send(content=f"Character {waifu_result['name']} was on the likelist"
-                                          f"but no claim was available!", embed=embed)
+            logging.warning(f'Character {waifu_result["name"]} was on the lovelist but no claim is available!')
             return
 
-        logging.info(f'Character {waifu_result["name"]} in likelist, attempting marry')
+        logging.info(f'Character {waifu_result["name"]} in lovelist, attempting marry')
+        await dm_channel.send(content=f"Character {waifu_result['name']} is in the lovelist"
+                                      f"Attempting to marry", embed=embed)
 
-        # New Mudae bot does not automatically add emojis, just react.
-        pool.submit(browser.react_emoji, "❤", message.id)
+        pool.submit(browser.add_heart)
 
-        """
-        try:
-            await client.wait_for('raw_reaction_add', check=reaction_check, timeout=3)
-        except TimeoutError:
-            logging.critical('Marry failed, could not detect bot reaction')
-            return
-        else:
-            await dm_channel.send(content=f"Marry attempted for {waifu_result['name']}", embed=embed)
-            timer.set_claim_availability(False)
-        """
+    if waifu_result['name'] in like_array and not waifu_result['is_claimed']:
+        await dm_channel.send(content=f"Character {waifu_result['name']} is in the likelist:"
+                              f"\nhttps://discord.com/channels/{config.SERVER_ID}/{config.CHANNEL_ID}\n", embed=embed)
+
+    if waifu_result['name'] not in like_array or love_array:
+        browser.set_im_state(True)
 
     # If key was rolled
     if waifu_result['owner'] == main_user.name and waifu_result['key']:
@@ -255,14 +268,10 @@ async def on_message(message):
 
     # If kakera loot available
     if waifu_result['is_claimed']:
-        if not timer.get_kakera_availablilty():
-            logging.warning(f'Character {waifu_result["name"]} has kakera loot but the loot was not available!')
-            await dm_channel.send(content=f"Character {waifu_result['name']} had kakera loot"
-                                          f" but no loot was available!", embed=embed)
-            return
+        logging.info(f'Character {waifu_result["name"]} has kakera loot...')
         logging.info('Attempting to loot kakera')
         try:
-            await client.wait_for('raw_reaction_add', check=reaction_check, timeout=3)
+            await client.wait_for('raw_reaction_add', check=reaction_check, timeout=10)
         except TimeoutError:
             logging.critical('Kakera loot failed, could not detect bot reaction')
             return
@@ -270,10 +279,18 @@ async def on_message(message):
             await dm_channel.send(content=f"Kakera loot attempted for {waifu_result['name']}", embed=embed)
             timer.set_kakera_availability(False)
 
+
 if __name__ == '__main__':
-    with open('./data/likelist.txt', 'r') as f:
+    with open('waifu_list/lovelist.txt', 'r') as f:
+        logging.info('Parsing lovelist')
+        love_array = [x.strip() for x in [x for x in f.readlines() if not x.startswith('\n')] if not x.startswith('#')]
+        logging.info(f'Current lovelist: {love_array}')
+
+    with open('waifu_list/likelist.txt', 'r') as f:
         logging.info('Parsing likelist')
         like_array = [x.strip() for x in [x for x in f.readlines() if not x.startswith('\n')] if not x.startswith('#')]
+        logging.info(f'Current likelist: {like_array}')
+
     pool = ThreadPoolExecutor()
     try:
         logging.info('Starting browser thread')

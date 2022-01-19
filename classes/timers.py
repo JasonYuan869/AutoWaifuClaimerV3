@@ -1,7 +1,7 @@
 import datetime
 import logging
 import time
-import config
+from config import config
 
 
 class Timer:
@@ -57,12 +57,15 @@ class Timer:
 
     def wait_for_roll(self):
         while True:
-            x = (self.roll_timer - datetime.datetime.now()).total_seconds()
-            self.logger.info(f'Roll timer sleeping for {x:.0f} seconds')
-            time.sleep(x)
+            hour = 3600  # Testing
+            minute = 60
+            end_of_interval = hour - (minute*3)
+            time_to_sleep = (end_of_interval + (self.roll_timer - datetime.datetime.now()).total_seconds())
+            self.logger.info(f'Roll timer sleeping for {time_to_sleep:.0f} seconds')
+            time.sleep(time_to_sleep)
             self.roll_timer += datetime.timedelta(minutes=self.roll_duration)
             self.logger.info('Rolls have been reset')
-            if config.ALWAYS_ROLL:
+            if not config.ALWAYS_ROLL:
                 self.logger.info(f'Initiating {self.roll_count} rolls')
                 self.browser.roll(self.roll_count)
             else:

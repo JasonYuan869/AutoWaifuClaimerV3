@@ -8,7 +8,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.firefox.options import Options
 from selenium.webdriver.support.wait import WebDriverWait
-import config
+from config import config
 
 
 class Browser:
@@ -44,6 +44,8 @@ class Browser:
 
         # Logging initialization
         self.logger = logging.getLogger(__name__)
+        self.character = str()
+        self.im_state = bool
 
     # Initiate browser
     def browser_login(self):
@@ -64,7 +66,7 @@ class Browser:
             self.driver.find_element(By.XPATH, "//button[@type='submit']").click()
             try:
                 # Wait for main screen
-                WebDriverWait(self.driver, 30).until(lambda x: x.find_element(By.CLASS_NAME, 'slateTextArea-1Mkdgw'))
+                WebDriverWait(self.driver, 15).until(lambda x: x.find_element(By.CLASS_NAME, 'textAreaSlate-9-y-k2'))
                 if f'{config.SERVER_ID}/{config.CHANNEL_ID}' not in self.driver.current_url:
                     # Logged in, but wrong channel (some weird error)
                     raise ValueError
@@ -85,7 +87,7 @@ class Browser:
         self.logger.info(f'Sending text: {text}')
         try:
             message_box = WebDriverWait(self.driver, 1).until(
-                lambda x: x.find_element(By.CLASS_NAME, 'slateTextArea-1Mkdgw'))
+                lambda x: x.find_element(By.CLASS_NAME, 'textAreaSlate-9-y-k2'))
         except TimeoutException:
             self.logger.warning("Discord may have crashed, refreshing page")
             self.refresh()
@@ -98,24 +100,25 @@ class Browser:
         self.actions.key_up(Keys.ENTER)
         self.actions.perform()
 
-    def react_emoji(self, emoji: str, message_id: int):
-        self.logger.info(f'Attempting to click emoji: {emoji}')
-        xpath = f"//div[@id='chat-messages-{message_id}']//div[@aria-label='{emoji}, press to react']"
+    def react_emoji(self, reaction: str, message_id: int):
+        self.logger.info(f'Attempting to click: {reaction}')
+        xpath = f"//*[@id='chat-messages-{message_id}']//*[@id='message-accessories-{message_id}']//*[@aria-label]"
+        time.sleep(1.5)
         try:
             # Get div containing emoji
             emoji_div = WebDriverWait(self.driver, 7).until(lambda x: x.find_element(By.XPATH, xpath))
             # Get current count
-            count = int(emoji_div.find_element(By.XPATH, "//div[@class='reactionCount-2mvXRV']").text)
+            count = int(emoji_div.find_element(By.XPATH, f"{xpath}//div").text)
             # Click emoji
             # WebElement.click() breaks for some reason, use javascript instead
             self.driver.execute_script('arguments[0].click();', emoji_div)
 
             # Check new count
             try:
-                WebDriverWait(self.driver, 1) \
+                WebDriverWait(self.driver, 4) \
                     .until_not(lambda x:
                                int(x.find_element(By.XPATH,
-                                                  f"{xpath}//div[@class='reactionCount-2mvXRV']").text) > count)
+                                                  f"{xpath}//div").text) > count)
             except TimeoutException:  # No increase in count
                 self.logger.warning('Emoji was found, but unsuccessfully clicked')
                 raise TimeoutError
@@ -127,7 +130,13 @@ class Browser:
 
     def add_heart(self):
         # Just type it.
-        self.send_text(f'+:heart:')
+        time.sleep(2)
+        self.send_text(f'+:two_hearts:')
+
+    def determine_im(self):
+        if self.im_state:
+            self.send_im()
+            self.set_im_state(False)
 
     def roll(self, count: int):
         """
@@ -135,12 +144,23 @@ class Browser:
         """
         for _ in range(count):
             self.send_text(f'{config.COMMAND_PREFIX}{config.ROLL_COMMAND}')
-            time.sleep(3)  # Sleep for 3 seconds between roll commands
+            time.sleep(2)  # Sleep for 3 seconds between roll commands
+            self.determine_im()
+            time.sleep(4)
+
+    def send_im(self):
+        self.send_text(f'$im {self.character}')
+
+    def set_character(self, character):
+        self.character = character
+
+    def set_im_state(self, boolean):
+        self.im_state = boolean
 
     def refresh(self):
         self.driver.refresh()
         WebDriverWait(self.driver, 10).until(
-            lambda x: x.find_element(By.CLASS_NAME, 'slateTextArea-1Mkdgw'))
+            lambda x: x.find_element(By.CLASS_NAME, 'textAreaSlate-9-y-k2'))
 
     def close(self):
         self.driver.close()
