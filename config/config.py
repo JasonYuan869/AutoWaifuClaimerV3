@@ -21,7 +21,7 @@ ROLL_COMMAND = "wa"
 #  User login info.
 #  This is not sent to any external server, but only uses to login to browser Discord.
 #  See Browser.browser_login() (specifically line 58-61) in browsers.py to see how it is exactly used.
-LOGIN_INFO = ("email.address@example.com", "example_password")
+LOGIN_INFO = ("nerdykoala.pm@gmail.com", "Qazws123")
 
 # Time between claim resets, in minutes.
 CLAIM_DURATION = 180

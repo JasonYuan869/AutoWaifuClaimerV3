@@ -106,8 +106,8 @@ async def on_ready():
             # Specifically, group 7 may be None if kakera is ready
             if x is None:
                 x = 0
-            elif 'h ' in x:
-                x = x.split('h ')
+            elif 'h' in x:
+                x = x.split('h')
                 x = int(x[0]) * 60 + int(x[1])
             elif x == 'ready' or x == 'now':
                 x = 0
@@ -139,7 +139,7 @@ async def on_ready():
         logging.info('Attempting to parse $tu command')
         pool.submit(Browser.send_text, browser, f'{config.COMMAND_PREFIX}tu')
         try:
-            await client.wait_for('message', check=parse_tu, timeout=3)
+            await client.wait_for('message', check=parse_tu, timeout=10)
         except TimeoutError:
             logging.critical('Could not parse $tu command, quitting (try again)')
             browser.close()

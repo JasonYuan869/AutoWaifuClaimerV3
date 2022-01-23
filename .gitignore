@@ -9,4 +9,5 @@
 /notes.txt
 /log.txt
 /geckodriver.log
-/data/likelist.txt
+/waifu_list
+.env
