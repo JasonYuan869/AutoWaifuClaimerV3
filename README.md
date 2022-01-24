@@ -54,6 +54,21 @@ This will be used for the browser Discord control. Put the path to the geckodriv
 
 Windows/Linux binaries have not been created and I don't think I will unless there is a strong demand for them.
 
+
+## Docker Steps
+
+- Download & Install Docker Desktop (Windows is awful so it will likely restart then ask you to install a Linux Kernel)
+
+- Update `.env` file `waifu_list/lovelist.txt` and `waifu_list/lovelist.txt`.
+
+- Update `config/config.py` file. (Requires credentials, do NOT VC with credentials loaded)
+
+- In terminal, start firefox container: `docker run -d -p 4446:4444 -v /dev/shm:/dev/shm selenium/standalone-firefox`
+
+
+
+
+
 ## Credits
 Regex strings for parsing the Mudae embed was adapted from Znunu's EzMudae module available at https://github.com/Znunu/EzMudae.
 
