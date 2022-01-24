@@ -39,9 +39,9 @@ class Browser:
         # Selenium browser control here
         options = Options()
         options.add_argument('-headless')
-        self.driver = webdriver.Firefox(executable_path=config.WEB_DRIVER_PATH, options=options)
+        # self.driver = webdriver.Firefox(executable_path=config.WEB_DRIVER_PATH, options=options)
+        self.driver = webdriver.Remote(command_executor=config.WEB_DRIVER_PATH, options=options)
         self.actions = ActionChains(self.driver)
-
         # Logging initialization
         self.logger = logging.getLogger(__name__)
         self.character = str()
@@ -130,13 +130,14 @@ class Browser:
 
     def add_heart(self):
         # Just type it.
-        time.sleep(2)
+        time.sleep(.5)
         self.send_text(f'+:two_hearts:')
 
     def determine_im(self):
         if self.im_state:
             self.send_im()
             self.set_im_state(False)
+        time.sleep(15)
 
     def roll(self, count: int):
         """
@@ -163,4 +164,4 @@ class Browser:
             lambda x: x.find_element(By.CLASS_NAME, 'textAreaSlate-9-y-k2'))
 
     def close(self):
-        self.driver.close()
+        self.driver.quit()

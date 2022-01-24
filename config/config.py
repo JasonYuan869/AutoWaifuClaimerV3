@@ -42,7 +42,7 @@ DAILY_DURATION = 1200
 KAKERA_DURATION = 60
 
 # Maximum number of rolls per reset.
-MAX_ROLLS = 20
+MAX_ROLLS = 13
 
 # Set True to roll every interval despite having claims or not.
 ALWAYS_ROLL = False
@@ -59,4 +59,4 @@ LOG_FILE = "logs/log.txt"
 # On Linux, single forward slashes are okay.
 # Ex. "/usr/bin/geckodriver"
 # Set to None if geckodriver is in the PATH
-WEB_DRIVER_PATH = "/Users/developer/geckodriver"
+WEB_DRIVER_PATH = "http://172.17.0.2:4444/wd/hub"

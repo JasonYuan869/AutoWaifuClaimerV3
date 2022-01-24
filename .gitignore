@@ -7,7 +7,7 @@
 /build.bat
 /build.sh
 /notes.txt
-/log.txt
+/logs/log.txt
 /geckodriver.log
 /waifu_list
 .env

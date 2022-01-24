@@ -227,15 +227,30 @@ async def on_message(message):
         pool.submit(browser.react_emoji, emoji.name, message.id)
         return True
 
+    def parse_user_input(message):
+        pass
+
     # BEGIN ON_MESSAGE BELOW #
     global main_user, mudae, dm_channel, roll_channel, ready
     if not ready:
         return
 
+    if message.channel == roll_channel and message.author == main_user:
+        if message.content.startswith("$quit"):
+            logging.critical("User Stopping Bot")
+            try:
+                browser.close()
+            except:
+                client.loop.stop()
+                client.loop.close()
+            finally:
+                client.loop.run_until_complete(client.logout())
+
     # Only parse messages from the bot in the right channel that contain a valid embed
     if message.channel != roll_channel or message.author != mudae or not len(message.embeds) == 1 or \
             message.embeds[0].image.url == message.embeds[0].Empty:
         return
+    # Check for user input
 
     embed = message.embeds[0]
     if not (waifu_result := parse_embed()):
@@ -302,6 +317,6 @@ if __name__ == '__main__':
     except discord.LoginFailure or aiohttp.ClientConnectorError:
         logging.critical(f"Improper token has been passed or connection to Discord failed, quitting")
     finally:
-        browser.close()
+        browser.quit()
         client.loop.stop()
         client.loop.close()
