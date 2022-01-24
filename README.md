@@ -28,46 +28,31 @@ Auto claims from Discord Mudae bot. Adapted from my previous (now obsolete) Auto
 ## How it works
 There are essentially three different processes running at the same time in this program. The first one opens browser Discord a headless Firefox window and attempts to login with provided credentials. The second one activates a Discord bot that will be listening for rolls and other activity. The last process controls the timers for rolling, claiming, kakera loots, and daily commands. Upon startup, the browser program will send a `$tu` command, which will be parsed by the bot. This will determine the time to next claim, roll, and daily. User commands are sent through Selenium keyboard actions to simulate a real user typing into the message box. Emoji reactions are interacted by executing Javascript on the site to click a specified reaction. As the program runs, the bot will continuously listen for rolls and parse them with regex (credit to [Znunu/EzMudae](https://github.com/Znunu/EzMudae) for the regex strings). If the roll is unclaimed and matches a name from the likelist, it automatically attempts a claim if one is available. Similarly, if a roll is already claimed, it automatically attempts a kakera loot if one is available. Lastly, if the roll is already claimed by the main user (specified in `config.py`), the bot will DM the user of a new key.
 
-## Usage
-Clone this repository and fill in the data in `.env`. See that file for more information. For information about copying Discord IDs, see [here](https://support.discord.com/hc/en-us/articles/206346498-Where-can-I-find-my-User-Server-Message-ID-). For information about making a bot see [here](https://www.writebots.com/discord-bot-token/).
-
-You will **need** to add a bot to the server.
-
-The bot must have the following permissions:
-- View Channels
-- Read Message History
-
-Install Python 3.8+ and required modules. Optionally make a new virtual environment for it.
-
-`pip install -r requirements.txt`
-
-
-Add wishes to `lovelist.txt`. The lovelist is so the program knows who to claim without hesitation. The program will immediately attempt to react if a character is rolled in the lovelist.
-
-Add likes to `likelist.txt`. The lovelist is so the program sends you alerts when a character you like is rolled, giving you control over claiming them or not. (Move fast if its someone else's roll)
-
-Install Firefox: https://www.mozilla.org/en-US/firefox/
-
-Download geckodriver: https://github.com/mozilla/geckodriver/releases (for your platform)
-
-This will be used for the browser Discord control. Put the path to the geckodriver executable in `config.py`. To start the bot, run `main.py`.
-
-Windows/Linux binaries have not been created and I don't think I will unless there is a strong demand for them.
-
-
-## Docker Steps
+## Using with Docker Steps
 
 - Download & Install Docker Desktop (Windows is awful so it will likely restart then ask you to install a Linux Kernel)
 
-- Update `.env` file `waifu_list/lovelist.txt` and `waifu_list/lovelist.txt`.
+- Update `example.env` file `waifu_list/lovelist.txt` and `waifu_list/lovelist.txt`.
 
-- Update `config/config.py` file. (Requires credentials, do NOT VC with credentials loaded)
+- Change `example.env` name to `.env`
+
+- Update `config/config.py` file. (Requires credentials, **DO NOT** Version Control with credentials loaded)
+
+- In the terminal, build the docker image for the python folder (Dockerfile Included): `docker build --tag waifu-claimer-v3 .`
 
 - In terminal, start firefox container: `docker run -d -p 4446:4444 -v /dev/shm:/dev/shm selenium/standalone-firefox`
 
+- In the terminal, run the build you created with: `docker run waifu-claimer-v3`
 
+If anything is not working, triple check you updated all the files above correctly, including adding every parameter to `example.env` 
 
+If you alter any of the files after getting to the step with docker build you will have to run the `docker build --tag waifu-claimer-v3 .` again. (It's much faster)
 
+Sometimes the bot fails to parse $tu, if it does fail just try to run it again.
+
+Using the Docker UI to manually reset containers is ok, sometimes connections get stuck. 
+
+Try your best to troubleshoot before submitting an issue :).
 
 ## Credits
 Regex strings for parsing the Mudae embed was adapted from Znunu's EzMudae module available at https://github.com/Znunu/EzMudae.
