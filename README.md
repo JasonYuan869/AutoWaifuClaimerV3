@@ -40,9 +40,9 @@ There are essentially three different processes running at the same time in this
 
 - In the terminal, build the docker image for the python folder (Dockerfile Included): `docker build --tag waifu-claimer-v3 .`
 
-- In terminal, start firefox container: `docker run -d -p 4446:4444 -v /dev/shm:/dev/shm selenium/standalone-firefox`
+- In terminal, start firefox container: `docker run -d --name firefox -p 4446:4444 -v /dev/shm:/dev/shm selenium/standalone-firefox`
 
-- In the terminal, run the build you created with: `docker run waifu-claimer-v3`
+- In the terminal, run the build you created with: `docker run --name waifu-claimer waifu-claimer-v3`
 
 If anything is not working, triple check you updated all the files above correctly, including adding every parameter to `example.env` 
 

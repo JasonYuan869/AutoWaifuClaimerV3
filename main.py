@@ -87,7 +87,8 @@ async def on_ready():
 
     def parse_tu(message):
         global timing_info
-        if message.channel != roll_channel or message.author != mudae: return
+        if message.channel != roll_channel or message.author != mudae:
+            return
         match = re.search(r"""^.*?(\w+).*?                                  # Group 1: Username
                                 (can't|can).*?                              # Group 2: Claim available
                                 (\d+(?:h\ \d+)?)(?=\*\*\ min).*?            # Group 3: Claim reset
@@ -98,7 +99,8 @@ async def on_ready():
                                 (?<=\$dk).*?(ready|\d+h\ \d+)               # Group 8: $dk reset
                                 .*$                                         # End of string
                                 """, message.content, re.DOTALL | re.VERBOSE)
-        if not match: return
+        if not match:
+            return
         if match.group(1) != main_user.name: return
         # Convert __h __ to minutes
         times = []
@@ -109,7 +111,7 @@ async def on_ready():
             elif 'h' in x:
                 x = x.split('h')
                 x = int(x[0]) * 60 + int(x[1])
-            elif x == 'ready' or x == 'now':
+            elif x == 'ready' or x == 'now' or x == 'available':
                 x = 0
             else:
                 x = int(x)
@@ -137,6 +139,8 @@ async def on_ready():
     # Only do so once by checking ready property
     if not ready:
         logging.info('Attempting to parse $tu command')
+        if config.COMMAND_PREFIX is None:
+            config.COMMAND_PREFIX = '$'
         pool.submit(Browser.send_text, browser, f'{config.COMMAND_PREFIX}tu')
         try:
             await client.wait_for('message', check=parse_tu, timeout=10)
@@ -258,7 +262,7 @@ async def on_message(message):
     browser.set_character(waifu_result['name'])
 
     # If unclaimed waifu was on likelist
-    if waifu_result['name'] in love_array:
+    if not waifu_result['is_claimed'] and waifu_result['name'] in love_array:
         logging.warning(f'{waifu_result["name"]} in lovelist')
         if not timer.get_claim_availability():  # No claim is available
             logging.warning(f'Character {waifu_result["name"]} was on the lovelist but no claim is available!')
@@ -268,7 +272,7 @@ async def on_message(message):
         await dm_channel.send(content=f"Character {waifu_result['name']} is in the lovelist"
                                       f"Attempting to marry", embed=embed)
 
-        pool.submit(browser.add_heart)
+        pool.submit(browser.attempt_claim)
 
     if waifu_result['name'] in like_array and not waifu_result['is_claimed']:
         await dm_channel.send(content=f"Character {waifu_result['name']} is in the likelist:"
@@ -317,6 +321,6 @@ if __name__ == '__main__':
     except discord.LoginFailure or aiohttp.ClientConnectorError:
         logging.critical(f"Improper token has been passed or connection to Discord failed, quitting")
     finally:
-        browser.quit()
+        browser.close()
         client.loop.stop()
         client.loop.close()

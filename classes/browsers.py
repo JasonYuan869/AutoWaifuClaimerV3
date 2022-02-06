@@ -38,7 +38,8 @@ class Browser:
         """
         # Selenium browser control here
         options = Options()
-        options.add_argument('-headless')
+        if config.HEADLESS:
+            options.add_argument('-headless')
         # self.driver = webdriver.Firefox(executable_path=config.WEB_DRIVER_PATH, options=options)
         self.driver = webdriver.Remote(command_executor=config.WEB_DRIVER_PATH, options=options)
         self.actions = ActionChains(self.driver)
@@ -86,7 +87,7 @@ class Browser:
         self.actions = ActionChains(self.driver)
         self.logger.info(f'Sending text: {text}')
         try:
-            message_box = WebDriverWait(self.driver, 1).until(
+            message_box = WebDriverWait(self.driver, 5).until(
                 lambda x: x.find_element(By.CLASS_NAME, 'textAreaSlate-9-y-k2'))
         except TimeoutException:
             self.logger.warning("Discord may have crashed, refreshing page")
@@ -102,13 +103,13 @@ class Browser:
 
     def react_emoji(self, reaction: str, message_id: int):
         self.logger.info(f'Attempting to click: {reaction}')
-        xpath = f"//*[@id='chat-messages-{message_id}']//*[@id='message-accessories-{message_id}']//*[@aria-label]"
-        time.sleep(1.5)
+        xpath = f"//*[@id='chat-messages-{message_id}']//*[@id='message-accessories-{message_id}']//*[div]//*[div]//*[div]//*[div]//*[div]"
+        time.sleep(config.INSTANT_REACT_SPEED)
         try:
             # Get div containing emoji
             emoji_div = WebDriverWait(self.driver, 7).until(lambda x: x.find_element(By.XPATH, xpath))
             # Get current count
-            count = int(emoji_div.find_element(By.XPATH, f"{xpath}//div").text)
+            count = 1
             # Click emoji
             # WebElement.click() breaks for some reason, use javascript instead
             self.driver.execute_script('arguments[0].click();', emoji_div)
@@ -128,10 +129,10 @@ class Browser:
             self.logger.critical('Unable to find the emoji to click')
             raise TimeoutError
 
-    def add_heart(self):
-        # Just type it.
-        time.sleep(.5)
-        self.send_text(f'+:two_hearts:')
+    def attempt_claim(self):
+        emoji = f"+{config.CLAIM_EMOJI}" #add : if only showing part of the word
+        time.sleep(config.INSTANT_CLAIM_SPEED)
+        self.send_text(emoji)
 
     def determine_im(self):
         if self.im_state:
@@ -145,7 +146,7 @@ class Browser:
         """
         for _ in range(count):
             self.send_text(f'{config.COMMAND_PREFIX}{config.ROLL_COMMAND}')
-            time.sleep(2)  # Sleep for 3 seconds between roll commands
+            time.sleep(8)  # Sleep between roll commands
             self.determine_im()
             time.sleep(4)
 

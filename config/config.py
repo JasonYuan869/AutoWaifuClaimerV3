@@ -18,10 +18,16 @@ BOT_TOKEN = os.getenv("BOT_TOKEN")
 COMMAND_PREFIX = "$"
 ROLL_COMMAND = "wa"
 
+CLAIM_EMOJI = ":heart:"
+INSTANT_CLAIM_SPEED = 0
+
+INSTANT_REACT_SPEED = 1
+
+HEADLESS = False
 #  User login info.
 #  This is not sent to any external server, but only uses to login to browser Discord.
 #  See Browser.browser_login() (specifically line 58-61) in browsers.py to see how it is exactly used.
-LOGIN_INFO = ("example@email.com", "Password")
+LOGIN_INFO = ("", "")
 
 # Time between claim resets, in minutes.
 CLAIM_DURATION = 180
