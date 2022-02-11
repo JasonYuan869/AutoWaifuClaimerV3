@@ -36,6 +36,7 @@ class Timer:
         self.roll_count = config.MAX_ROLLS
         self.daily_duration = config.DAILY_DURATION
         self.claim_duration = config.CLAIM_DURATION
+        self.time_to_roll = config.TIME_TO_ROLL
         self.roll_duration = config.ROLL_DURATION
         self.kakera_duration = config.KAKERA_DURATION
         self.logger = logging.getLogger(__name__)
@@ -59,13 +60,13 @@ class Timer:
         while True:
             hour = 3600  # Testing
             minute = 60
-            end_of_interval = hour - (minute*3)
+            end_of_interval = hour - (minute * self.time_to_roll)
             time_to_sleep = (end_of_interval + (self.roll_timer - datetime.datetime.now()).total_seconds())
             self.logger.info(f'Roll timer sleeping for {time_to_sleep:.0f} seconds')
             time.sleep(time_to_sleep)
             self.roll_timer += datetime.timedelta(minutes=self.roll_duration)
             self.logger.info('Rolls have been reset')
-            if not config.ALWAYS_ROLL:
+            if config.ALWAYS_ROLL:
                 self.logger.info(f'Initiating {self.roll_count} rolls')
                 self.browser.roll(self.roll_count)
             else:

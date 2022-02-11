@@ -138,12 +138,9 @@ async def on_ready():
     # Parse timers by sending $tu command
     # Only do so once by checking ready property
     if not ready:
-        logging.info('Attempting to parse $tu command')
-        if config.COMMAND_PREFIX is None:
-            config.COMMAND_PREFIX = '$'
-        pool.submit(Browser.send_text, browser, f'{config.COMMAND_PREFIX}tu')
+        logging.info('Attempting to parse $tu command... Send $tu command within 30 seconds.')
         try:
-            await client.wait_for('message', check=parse_tu, timeout=10)
+            await client.wait_for('message', check=parse_tu, timeout=30)
         except TimeoutError:
             logging.critical('Could not parse $tu command, quitting (try again)')
             browser.close()
@@ -187,8 +184,15 @@ async def on_message(message):
                 key = match.group(2)
 
         # Check if it was a roll
-        # Look for any
+        # Look for stars in embed (Example: **47**)
         match = re.search(r'(?<=\*)(\d+)', desc, re.DOTALL)
+        if match:
+            pass
+
+        # Look for picture wheel (Example: 1/31)
+        # match = re.search(r'(?<=\d)(\/)', desc, re.DOTALL) doesn't find
+
+        match = re.search(r'(:female:|:male:)', desc, re.DOTALL)
         if match:
             return
 
@@ -262,17 +266,12 @@ async def on_message(message):
     browser.set_character(waifu_result['name'])
 
     # If unclaimed waifu was on likelist
-    if not waifu_result['is_claimed'] and waifu_result['name'] in love_array:
-        logging.warning(f'{waifu_result["name"]} in lovelist')
-        if not timer.get_claim_availability():  # No claim is available
-            logging.warning(f'Character {waifu_result["name"]} was on the lovelist but no claim is available!')
-            return
-
-        logging.info(f'Character {waifu_result["name"]} in lovelist, attempting marry')
-        await dm_channel.send(content=f"Character {waifu_result['name']} is in the lovelist"
-                                      f"Attempting to marry", embed=embed)
-
+    if not waifu_result['is_claimed'] and timer.get_claim_availability() and waifu_result['name'] in love_array:
         pool.submit(browser.attempt_claim)
+        logging.info(f'{waifu_result["name"]} in lovelist')
+        logging.info(f'Character {waifu_result["name"]} in lovelist, attempting marry')
+        await dm_channel.send(content=f"{waifu_result['name']} is in the lovelist"
+                                      f"Attempted to marry", embed=embed)
 
     if waifu_result['name'] in like_array and not waifu_result['is_claimed']:
         await dm_channel.send(content=f"Character {waifu_result['name']} is in the likelist:"
@@ -280,13 +279,15 @@ async def on_message(message):
 
     if waifu_result['name'] not in like_array or love_array:
         browser.set_im_state(True)
+        if config.TEST_REACT:
+            pool.submit(browser.attempt_claim)
 
     # If key was rolled
     if waifu_result['owner'] == main_user.name and waifu_result['key']:
         await dm_channel.send(content=f"{waifu_result['key']} rolled for {waifu_result['name']}", embed=embed)
 
     # If kakera loot available
-    if waifu_result['is_claimed']:
+    if waifu_result['is_claimed'] and timer.get_kakera_availablilty():
         logging.info(f'Character {waifu_result["name"]} has kakera loot...')
         logging.info('Attempting to loot kakera')
         try:
@@ -302,12 +303,12 @@ async def on_message(message):
 if __name__ == '__main__':
     with open('waifu_list/lovelist.txt', 'r') as f:
         logging.info('Parsing lovelist')
-        love_array = [x.strip() for x in [x for x in f.readlines() if not x.startswith('\n')] if not x.startswith('#')]
+        love_array = tuple({x.strip() for x in [x for x in f.readlines() if not x.startswith('\n')] if not x.startswith('#')})
         logging.info(f'Current lovelist: {love_array}')
 
     with open('waifu_list/likelist.txt', 'r') as f:
         logging.info('Parsing likelist')
-        like_array = [x.strip() for x in [x for x in f.readlines() if not x.startswith('\n')] if not x.startswith('#')]
+        like_array = tuple({x.strip() for x in [x for x in f.readlines() if not x.startswith('\n')] if not x.startswith('#')})
         logging.info(f'Current likelist: {like_array}')
 
     pool = ThreadPoolExecutor()

@@ -1,10 +1,16 @@
 # EDIT THE CONFIG HERE #
 import os
 from dotenv import load_dotenv
+
 load_dotenv()
 
+# | DO NOT CHANGE THESE | #
+
+# Login Info
+EMAIL = os.getenv("EMAIL")
+PASSWORD = os.getenv("PASSWORD")
+
 # Discord IDs
-# Replace values with your own.
 MUDAE_ID = os.getenv("MUDAE_ID")  # ID of Mudae bot
 CHANNEL_ID = os.getenv("CHANNEL_ID")  # ID of claiming channel
 SERVER_ID = os.getenv("SERVER_ID")  # ID of Discord server
@@ -13,28 +19,29 @@ USER_ID = os.getenv("USER_ID")  # ID of main user
 # Bot token
 BOT_TOKEN = os.getenv("BOT_TOKEN")
 
+# | YOU CAN EDIT THESE | #
+
 # Command prefix for Mudae and roll command to use.
 # Default setting below does $m
 COMMAND_PREFIX = "$"
 ROLL_COMMAND = "wa"
 
+# Emoji used for claiming
 CLAIM_EMOJI = ":heart:"
+
+# Speed to claim Waifu in lovelist (Currently Fastest Possible)
 INSTANT_CLAIM_SPEED = 0
-
+# Speed to react on kakera (Default 1 second delay)
 INSTANT_REACT_SPEED = 1
-
-HEADLESS = False
-#  User login info.
-#  This is not sent to any external server, but only uses to login to browser Discord.
-#  See Browser.browser_login() (specifically line 58-61) in browsers.py to see how it is exactly used.
-LOGIN_INFO = ("", "")
-
 # Time between claim resets, in minutes.
 CLAIM_DURATION = 180
 
 # Time between roll resets, in minutes.
 # Set to 0 to disable auto rolls.
 ROLL_DURATION = 60
+
+# Time in the hour to start rolling. (Example: 10 means 10 mins before reset. & 50 means 50 minutes before reset.)
+TIME_TO_ROLL = 10
 
 # Time between daily command resets, in minutes.
 # Set to 0 to disable auto dailies.
@@ -48,12 +55,17 @@ DAILY_DURATION = 1200
 KAKERA_DURATION = 60
 
 # Maximum number of rolls per reset.
-MAX_ROLLS = 13
+MAX_ROLLS = 19
 
 # Set True to roll every interval despite having claims or not.
 ALWAYS_ROLL = False
 
 LOG_FILE = "logs/log.txt"
+
+# | DEBUGGING TOOLS | #
+TEST_CLAIM = False
+TEST_REACT = False  # Nothing built yet
+HEADLESS = True  # Watch the bot operate in firefox container
 
 # SELENIUM CONFIG INFO #
 # On Ubuntu, run:

@@ -1,4 +1,15 @@
-# AutoWaifuClaimer (Updated)
+# (Updated 02/10/2020)
+Major Updates Include:
+- Simplified setup using docker containers
+- Much more consistent $tu parsing (manually input $tu)
+- Hardcoded Xpath's to prevent failures on DOM element changes
+- Optimized Logic for easier debugging
+- Greater control through config file
+- Greater security using .env files
+- Optimized waifu_list to account for duplicates
+- Support through Discord! @ NerdyK#9470
+- Various other changes improved stability
+# AutoWaifuClaimer
 Auto claims from Discord Mudae bot. Adapted from my previous (now obsolete) AutoWaifuClaimer project, which used a Discord bot to listen for roll events and reacted using the pyinput module and the official Discord client. The previous implementation came with the major limitation of requiring Discord to be the main focused window, preventing the user from doing any other tasks at the same time. This new implementation solves that problem and is overall significantly more reliable and consistent.
 
 ## Features
@@ -18,12 +29,10 @@ Auto claims from Discord Mudae bot. Adapted from my previous (now obsolete) Auto
 
 ## Limitations and bugs
 - Some unexpected behaviour
-- 
 
 ## Requirements
-- Firefox and [geckodriver](https://github.com/mozilla/geckodriver/releases)
-- Python 3.8+ (haven't tested on 3.7)
-- Python modules: see `requirements.txt`
+- Docker Desktop | https://www.docker.com/products/docker-desktop
+
 
 ## How it works
 There are essentially three different processes running at the same time in this program. The first one opens browser Discord a headless Firefox window and attempts to login with provided credentials. The second one activates a Discord bot that will be listening for rolls and other activity. The last process controls the timers for rolling, claiming, kakera loots, and daily commands. Upon startup, the browser program will send a `$tu` command, which will be parsed by the bot. This will determine the time to next claim, roll, and daily. User commands are sent through Selenium keyboard actions to simulate a real user typing into the message box. Emoji reactions are interacted by executing Javascript on the site to click a specified reaction. As the program runs, the bot will continuously listen for rolls and parse them with regex (credit to [Znunu/EzMudae](https://github.com/Znunu/EzMudae) for the regex strings). If the roll is unclaimed and matches a name from the likelist, it automatically attempts a claim if one is available. Similarly, if a roll is already claimed, it automatically attempts a kakera loot if one is available. Lastly, if the roll is already claimed by the main user (specified in `config.py`), the bot will DM the user of a new key.
@@ -40,7 +49,7 @@ There are essentially three different processes running at the same time in this
 
 - In the terminal, build the docker image for the python folder (Dockerfile Included): `docker build --tag waifu-claimer-v3 .`
 
-- In terminal, start firefox container: `docker run -d --name firefox -p 4446:4444 -v /dev/shm:/dev/shm selenium/standalone-firefox`
+- In terminal, start firefox container: `docker run -d --name firefox -e SE_NODE_OVERRIDE_MAX_SESSIONS=true -e SE_NODE_MAX_SESSIONS=3 -e SE_NODE_SESSION_TIMEOUT=86400 -p 4446:4444 -v /dev/shm:/dev/shm selenium/standalone-firefox`
 
 - In the terminal, run the build you created with: `docker run --name waifu-claimer waifu-claimer-v3`
 

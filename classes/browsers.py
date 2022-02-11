@@ -47,6 +47,7 @@ class Browser:
         self.logger = logging.getLogger(__name__)
         self.character = str()
         self.im_state = bool
+        self.im = False
 
     # Initiate browser
     def browser_login(self):
@@ -62,8 +63,8 @@ class Browser:
                 raise TimeoutError
         else:
             self.logger.info('Logging in with provided credentials (this may take up to 30 seconds)')
-            email.send_keys(config.LOGIN_INFO[0])
-            self.driver.find_element(By.NAME, 'password').send_keys(config.LOGIN_INFO[1])
+            email.send_keys(config.EMAIL)
+            self.driver.find_element(By.NAME, 'password').send_keys(config.PASSWORD)
             self.driver.find_element(By.XPATH, "//button[@type='submit']").click()
             try:
                 # Wait for main screen
@@ -131,14 +132,14 @@ class Browser:
 
     def attempt_claim(self):
         emoji = f"+{config.CLAIM_EMOJI}" #add : if only showing part of the word
-        time.sleep(config.INSTANT_CLAIM_SPEED)
+        # time.sleep(config.INSTANT_CLAIM_SPEED)
         self.send_text(emoji)
 
     def determine_im(self):
-        if self.im_state:
+        if self.im and self.im_state:
             self.send_im()
             self.set_im_state(False)
-        time.sleep(15)
+            time.sleep(8)
 
     def roll(self, count: int):
         """
