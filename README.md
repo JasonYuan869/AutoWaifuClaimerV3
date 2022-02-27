@@ -1,14 +1,7 @@
-# (Updated 02/10/2020)
+# (Updated 02/26/2020)
 Major Updates Include:
-- Simplified setup using docker containers
-- Much more consistent $tu parsing (manually input $tu)
-- Hardcoded Xpath's to prevent failures on DOM element changes
-- Optimized Logic for easier debugging
-- Greater control through config file
-- Greater security using .env files
-- Optimized waifu_list to account for duplicates
-- Support through Discord! @ NerdyK#9470
-- Various other changes improved stability
+- Improved $tu parse for greater range of $tu information
+- Added new claim method.
 # AutoWaifuClaimer
 Auto claims from Discord Mudae bot. Adapted from my previous (now obsolete) AutoWaifuClaimer project, which used a Discord bot to listen for roll events and reacted using the pyinput module and the official Discord client. The previous implementation came with the major limitation of requiring Discord to be the main focused window, preventing the user from doing any other tasks at the same time. This new implementation solves that problem and is overall significantly more reliable and consistent.
 
