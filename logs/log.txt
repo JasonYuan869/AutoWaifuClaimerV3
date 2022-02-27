@@ -1,0 +1,2 @@
+2022-02-12 21:42:11,300 - selenium.webdriver.remote.remote_connection - INFO - Could not connect to port 4444 on host 172.17.0.2
+2022-02-12 21:42:11,301 - selenium.webdriver.remote.remote_connection - INFO - Could not get IP address for host: 172.17.0.2

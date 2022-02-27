@@ -1,7 +1,6 @@
 # EDIT THE CONFIG HERE #
 import os
 from dotenv import load_dotenv
-
 load_dotenv()
 
 # | DO NOT CHANGE THESE | #
@@ -28,7 +27,7 @@ ROLL_COMMAND = "wa"
 
 # Emoji used for claiming
 CLAIM_EMOJI = ":heart:"
-
+CLAIM_METHOD_CLICK = False  # If True claim will attempt to react on emoji instead of add one (Needs Emoji available)
 # Speed to claim Waifu in lovelist (Currently Fastest Possible)
 INSTANT_CLAIM_SPEED = 0
 # Speed to react on kakera (Default 1 second delay)
@@ -42,7 +41,7 @@ ROLL_DURATION = 60
 
 # Time in the hour to start rolling. (Example: 10 means 10 mins before reset. & 50 means 50 minutes before reset.)
 TIME_TO_ROLL = 10
-
+RANDOM_TIME = True
 # Time between daily command resets, in minutes.
 # Set to 0 to disable auto dailies.
 DAILY_DURATION = 1200
@@ -55,7 +54,7 @@ DAILY_DURATION = 1200
 KAKERA_DURATION = 60
 
 # Maximum number of rolls per reset.
-MAX_ROLLS = 19
+MAX_ROLLS = 27
 
 # Set True to roll every interval despite having claims or not.
 ALWAYS_ROLL = False

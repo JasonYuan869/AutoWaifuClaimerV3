@@ -9,6 +9,6 @@
 /notes.txt
 /logs
 /geckodriver.log
-/waifu_list
+/waifu_list/
 .env
 geckodriver

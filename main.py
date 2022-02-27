@@ -18,11 +18,11 @@ from asyncio import TimeoutError
 import discord
 import sys
 import re
+import aiohttp
 from concurrent.futures import ThreadPoolExecutor
 import threading
 import logging
 import datetime
-import aiohttp
 from config import config
 from classes.browsers import Browser
 from classes.timers import Timer
@@ -61,8 +61,30 @@ timing_info = {
 }
 
 
-async def add_emoji(message_id):
-    await client
+def validate_parse(message):
+    return message.content.split()[1:] if len(message.content.split()) == 3 else None
+
+
+async def parse_user_message(message):
+    if message.content.startswith("$quit"):
+        success = await determine_operation(validate_parse(message))
+
+    if message.content.startswith("$set"):
+        success = await determine_operation(validate_parse(message))
+        if success:
+            browser.send_check()
+
+    return
+
+
+async def determine_operation(*params: str):
+    operator, param = params[0][0], int(params[0][1])
+    logging.info(f"{operator}, {param}")
+    return {
+        'roll_count': lambda: timer.set_roll_count(param),
+        'auto_roll': lambda: browser.manual_roll(param),
+        'rolling': lambda: logging.info("Quitting rolls")
+    }.get(operator, lambda: browser.send_x())()
 
 
 async def go_offline():
@@ -86,8 +108,10 @@ async def on_ready():
         await close_bot()
 
     def parse_tu(message):
+        logging.info("$tu received")
         global timing_info
         if message.channel != roll_channel or message.author != mudae:
+            logging.info("Not from Mudae, or wrong channel")
             return
         match = re.search(r"""^.*?(\w+).*?                                  # Group 1: Username
                                 (can't|can).*?                              # Group 2: Claim available
@@ -100,8 +124,11 @@ async def on_ready():
                                 .*$                                         # End of string
                                 """, message.content, re.DOTALL | re.VERBOSE)
         if not match:
+            logging.info("tu parse couldn't match timers perfectly.")
+
+        if match.group(1) != main_user.name:
+            logging.info("User name doesn't match")
             return
-        if match.group(1) != main_user.name: return
         # Convert __h __ to minutes
         times = []
         for x in [match.group(3), match.group(4), match.group(5), match.group(7)]:
@@ -138,9 +165,9 @@ async def on_ready():
     # Parse timers by sending $tu command
     # Only do so once by checking ready property
     if not ready:
-        logging.info('Attempting to parse $tu command... Send $tu command within 30 seconds.')
+        logging.info('Attempting to parse $tu command... Send $tu command within 60 seconds.')
         try:
-            await client.wait_for('message', check=parse_tu, timeout=30)
+            await client.wait_for('message', check=parse_tu, timeout=60)
         except TimeoutError:
             logging.critical('Could not parse $tu command, quitting (try again)')
             browser.close()
@@ -235,24 +262,14 @@ async def on_message(message):
         pool.submit(browser.react_emoji, emoji.name, message.id)
         return True
 
-    def parse_user_input(message):
-        pass
-
     # BEGIN ON_MESSAGE BELOW #
     global main_user, mudae, dm_channel, roll_channel, ready
     if not ready:
         return
 
     if message.channel == roll_channel and message.author == main_user:
-        if message.content.startswith("$quit"):
-            logging.critical("User Stopping Bot")
-            try:
-                browser.close()
-            except:
-                client.loop.stop()
-                client.loop.close()
-            finally:
-                client.loop.run_until_complete(client.logout())
+        # User Control
+        await parse_user_message(message)
 
     # Only parse messages from the bot in the right channel that contain a valid embed
     if message.channel != roll_channel or message.author != mudae or not len(message.embeds) == 1 or \
@@ -267,15 +284,18 @@ async def on_message(message):
 
     # If unclaimed waifu was on likelist
     if not waifu_result['is_claimed'] and timer.get_claim_availability() and waifu_result['name'] in love_array:
-        pool.submit(browser.attempt_claim)
-        logging.info(f'{waifu_result["name"]} in lovelist')
+        if config.CLAIM_METHOD_CLICK:
+            await client.wait_for('raw_reaction_add', check=reaction_check, timeout=10)
+        else:
+            pool.submit(browser.attempt_claim)
+
         logging.info(f'Character {waifu_result["name"]} in lovelist, attempting marry')
         await dm_channel.send(content=f"{waifu_result['name']} is in the lovelist"
                                       f"Attempted to marry", embed=embed)
 
     if waifu_result['name'] in like_array and not waifu_result['is_claimed']:
-        await dm_channel.send(content=f"Character {waifu_result['name']} is in the likelist:"
-                              f"\nhttps://discord.com/channels/{config.SERVER_ID}/{config.CHANNEL_ID}\n", embed=embed)
+        await dm_channel.send(content=f"{waifu_result['name']} is in the likelist:"
+                                      f"\nhttps://discord.com/channels/{config.SERVER_ID}/{config.CHANNEL_ID}/{message.id}\n")
 
     if waifu_result['name'] not in like_array or love_array:
         browser.set_im_state(True)
@@ -287,28 +307,35 @@ async def on_message(message):
         await dm_channel.send(content=f"{waifu_result['key']} rolled for {waifu_result['name']}", embed=embed)
 
     # If kakera loot available
-    if waifu_result['is_claimed'] and timer.get_kakera_availablilty():
-        logging.info(f'Character {waifu_result["name"]} has kakera loot...')
-        logging.info('Attempting to loot kakera')
+    if waifu_result['is_claimed'] and timer.get_kakera_availability():
+        logging.info(f'Attempting to loot kakera on {waifu_result["name"]}')
         try:
             await client.wait_for('raw_reaction_add', check=reaction_check, timeout=10)
         except TimeoutError:
-            logging.critical('Kakera loot failed, could not detect bot reaction')
-            return
+            logging.critical('First Kakera loot failed, could not detect bot reaction')
+            try:
+                await client.wait_for('raw_reaction_add', check=reaction_check, timeout=10)
+            except TimeoutError:
+                logging.critical('Second attempt failed. exiting.')
+                return
         else:
-            await dm_channel.send(content=f"Kakera loot attempted for {waifu_result['name']}", embed=embed)
-            timer.set_kakera_availability(False)
+            await dm_channel.send(content=f"Kakera loot attempted for {waifu_result['name']}")
+            # TODO: Add react check
+            # timer.set_kakera_availability(False)
 
 
 if __name__ == '__main__':
+    logging.info("Graceful Killer Initialized")
     with open('waifu_list/lovelist.txt', 'r') as f:
         logging.info('Parsing lovelist')
-        love_array = tuple({x.strip() for x in [x for x in f.readlines() if not x.startswith('\n')] if not x.startswith('#')})
+        love_array = tuple(
+            {x.strip() for x in [x for x in f.readlines() if not x.startswith('\n')] if not x.startswith('#')})
         logging.info(f'Current lovelist: {love_array}')
 
     with open('waifu_list/likelist.txt', 'r') as f:
         logging.info('Parsing likelist')
-        like_array = tuple({x.strip() for x in [x for x in f.readlines() if not x.startswith('\n')] if not x.startswith('#')})
+        like_array = tuple(
+            {x.strip() for x in [x for x in f.readlines() if not x.startswith('\n')] if not x.startswith('#')})
         logging.info(f'Current likelist: {like_array}')
 
     pool = ThreadPoolExecutor()
@@ -316,10 +343,10 @@ if __name__ == '__main__':
         logging.info('Starting browser thread')
         browser_login = pool.submit(Browser.browser_login, browser)
         client.loop.run_until_complete(client.start(config.BOT_TOKEN))
-    except KeyboardInterrupt:
+    except KeyboardInterrupt or RuntimeError:
         logging.critical("Keyboard interrupt, quitting")
         client.loop.run_until_complete(client.logout())
-    except discord.LoginFailure or aiohttp.ClientConnectorError:
+    except discord.LoginFailure or aiohttp.ClientConnectorError or RuntimeError:
         logging.critical(f"Improper token has been passed or connection to Discord failed, quitting")
     finally:
         browser.close()

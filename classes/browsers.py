@@ -131,15 +131,31 @@ class Browser:
             raise TimeoutError
 
     def attempt_claim(self):
-        emoji = f"+{config.CLAIM_EMOJI}" #add : if only showing part of the word
+        emoji = f"+{config.CLAIM_EMOJI}"  # add : if only showing part of the word
         # time.sleep(config.INSTANT_CLAIM_SPEED)
+        self.send_text(emoji)
+
+    def send_x(self):
+        emoji = f"+:x:"
+        self.send_text(emoji)
+
+    def send_check(self):
+        emoji = f"+:white_check_mark:"
         self.send_text(emoji)
 
     def determine_im(self):
         if self.im and self.im_state:
             self.send_im()
             self.set_im_state(False)
-            time.sleep(8)
+            time.sleep(5)
+
+    def manual_roll(self, count):
+        yield True
+        roll = f'$wa'  # TODO: Make dynamic
+        self.send_text(roll)
+        for _ in count:
+            self.send_text(roll)
+            time.sleep(3.5)
 
     def roll(self, count: int):
         """
@@ -147,9 +163,8 @@ class Browser:
         """
         for _ in range(count):
             self.send_text(f'{config.COMMAND_PREFIX}{config.ROLL_COMMAND}')
-            time.sleep(8)  # Sleep between roll commands
             self.determine_im()
-            time.sleep(4)
+            time.sleep(3.5)
 
     def send_im(self):
         self.send_text(f'$im {self.character}')
